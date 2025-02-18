@@ -21,11 +21,9 @@ REQUIRED_DIRS = [
     "datasets/custom_dataset/labels/val"
 ]
 
-# Create these dirs if they don't exist
 for d in REQUIRED_DIRS:
     os.makedirs(d, exist_ok=True)
 
-# If data.yaml doesn't exist, create a minimal default
 if not os.path.exists(DATA_YAML_PATH):
     default_data = {
         "train": "datasets/custom_dataset/images/train",
@@ -42,9 +40,9 @@ device_type = 0 if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device_type}")
 
 # --------------------------------------------------
-# 2. Global Model
+# 2. Global Model (start as None)
 # --------------------------------------------------
-model = YOLO("yolov8n.pt")
+model = None
 
 # --------------------------------------------------
 # Utility: Load & Save data.yaml
@@ -70,15 +68,16 @@ def save_yolo_label(image_path, class_id, bbox, img_shape):
     width = (x2 - x1) / w
     height = (y2 - y1) / h
 
-    if "images/train" in image_path:
-        label_path = image_path.replace("images/train", "labels/train")
-    elif "images/val" in image_path:
-        label_path = image_path.replace("images/val", "labels/val")
+    normalized_path = image_path.replace("\\", "/")
+
+    if "images/train" in normalized_path:
+        label_path = normalized_path.replace("images/train", "labels/train")
+    elif "images/val" in normalized_path:
+        label_path = normalized_path.replace("images/val", "labels/val")
     else:
         raise ValueError(f"image_path not recognized: {image_path}")
 
     label_path = label_path.replace(".jpg", ".txt")
-
     with open(label_path, "w") as f:
         f.write(f"{class_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n")
 
@@ -149,11 +148,7 @@ def data_collection():
 
             timestamp = int(time.time() * 1000)
             img_filename = f"img_{class_name}_{timestamp}.jpg"
-            img_path = os.path.join(
-                f"datasets/custom_dataset/images/{subset}", 
-                img_filename
-            )
-
+            img_path = os.path.join("datasets/custom_dataset/images", subset, img_filename)
             cv2.imwrite(img_path, frame)
 
             if class_name not in data_yaml["names"]:
@@ -161,8 +156,6 @@ def data_collection():
                 save_data_yaml(data_yaml)
 
             class_id = data_yaml["names"].index(class_name)
-
-            # Save label to the corresponding subset folder
             save_yolo_label(
                 image_path=img_path,
                 class_id=class_id,
@@ -195,6 +188,7 @@ def train_mode():
 
     if st.button("Start Training"):
         with st.spinner("Training in progress..."):
+            # Initialize a fresh YOLO model
             new_model = YOLO("yolov8n.pt")
             results = new_model.train(
                 data=DATA_YAML_PATH,
@@ -205,14 +199,19 @@ def train_mode():
                 exist_ok=True,
                 device=device_type
             )
+
         st.success("Training Complete!")
 
         best_model_path = f"{results.save_dir}/weights/best.pt"
         st.write(f"Best model saved at: {best_model_path}")
 
+        # Update the global model with newly trained weights
         global model
         model = YOLO(best_model_path)
         st.success("Model updated with newly trained weights!")
+
+        # For debugging, show the classes in the newly loaded model
+        st.write("New model classes:", model.names)
 
 # --------------------------------------------------
 # Mode 3: Detection (Webcam)
@@ -231,6 +230,12 @@ def detection_mode():
             st.warning("Webcam failure.")
             break
 
+        # If we have NOT loaded a model yet, default to "yolov8n.pt"
+        global model
+        if model is None:
+            model = YOLO("yolov8n.pt")
+            st.info("No custom model loaded yet; using default YOLOv8n.")
+
         results = model.predict(source=frame, conf=conf_thres, device=device_type)
         annotated_frame = frame.copy()
 
@@ -244,7 +249,9 @@ def detection_mode():
 
         annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
         placeholder.image(annotated_frame)
-        #st.write("Current model classes:", model.names)
+
+        # For debugging, you could uncomment:
+        # st.write("Current model classes:", model.names)
         time.sleep(0.03)
 
     cap.release()
