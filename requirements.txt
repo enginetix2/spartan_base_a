@@ -1,0 +1,14 @@
+streamlit
+opencv-python
+streamlit-webrtc
+aiortc
+ultralytics
+torch --extra-index-url https://download.pytorch.org/whl/cu118/torch_stable.html
+torchvision --extra-index-url https://download.pytorch.org/whl/cu118/torch_stable.html
+torchtext
+torchaudio
+numpy
+pandas
+matplotlib
+Pillow
+PyYAML
