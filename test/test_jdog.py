@@ -2,10 +2,10 @@ import cv2
 from ultralytics import YOLO
 
 # 1) Load your best model
-model = YOLO("runs/train/custom_yolo/weights/best.pt")
+model = YOLO("./runs/train/custom_yolo/weights/best.pt")
 
 # 2) Choose a test image that should contain "j-dog"
-TEST_IMAGE = "datasets/custom_dataset/images/val/img_j-dog_1739920901747.jpg"
+TEST_IMAGE = "./datasets/custom_dataset/images/val/img_j-dog_1739920901747.jpg"
 
 # 3) Inference
 results = model.predict(TEST_IMAGE, conf=0.25)
