@@ -247,7 +247,7 @@ def run_opencv_snippet(conf_thres):
     Your known-working detection code, but we overlay:
     'Press q to exit...'
     """
-    model_path = "./runs/train/custom_yolo/weights/best.pt"
+    model_path = "runs/train/custom_yolo/weights/best.pt"
     model = YOLO(model_path)
 
     cap = cv2.VideoCapture(0)
@@ -287,7 +287,7 @@ def run_opencv_snippet(conf_thres):
                     (255, 255, 255), 
                     2)
 
-        cv2.imshow("YOLO Live", frame)
+        cv2.imshow("YOLO Live", frame) 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

@@ -13,3 +13,4 @@ pandas
 matplotlib
 Pillow
 PyYAML
+ollama

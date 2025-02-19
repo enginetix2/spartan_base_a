@@ -1,6 +1,8 @@
 import cv2
 from ultralytics import YOLO
 
+# Test a streaming version of the YOLO model
+
 def main():
     model = YOLO("./runs/train/custom_yolo/weights/best.pt")  # detection model
     cap = cv2.VideoCapture(0)
