@@ -189,7 +189,7 @@ def train_mode():
 
     if st.button("Start Training"):
         with st.spinner("Training in progress..."):
-            new_model = YOLO("yolov8n.pt")
+            new_model = YOLO("yolo11n.pt")
             results = new_model.train(
                 data=DATA_YAML_PATH,
                 epochs=epochs,
@@ -217,12 +217,6 @@ def train_mode():
 # --------------------------------------------------
 # Mode 3: Detection
 # --------------------------------------------------
-import os
-import cv2
-import numpy as np
-from ultralytics import YOLO
-import streamlit as st
-
 def detection_mode():
     st.header("Simple Static Detection (Forced best.pt)")
 
@@ -303,10 +297,10 @@ def draw_boxes(frame, results, class_names):
 # Main Streamlit Interface
 # --------------------------------------------------
 def main():
-    st.title("Simple YOLOv8 App")
+    st.title("Simple YOLOv11 App")
     global model
 
-    mode = st.sidebar.selectbox("Mode", ["Data Collection", "Train", "Detection"])
+    mode = st.sidebar.selectbox("Mode", ["Detection", "Data Collection", "Train"])
     if mode == "Data Collection":
         data_collection()
     elif mode == "Train":
