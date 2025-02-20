@@ -25,12 +25,13 @@ def call_vision_model_ollama(frame):
     # 2) Call Ollama with 'images': [temp_path]
     #    The 'messages' structure might differ if your version needs something else.
     response = ollama.chat(
-        model="llama3.2-vision",
+        model="moondream",
         messages=[
             {
                 "role": "user",
                 "content": "Very concise: describe this image in detail.",
-                "images": [temp_path]
+                "images": [temp_path],
+                "max_tokens": 64,
             }
         ],
         stream=False  # synchronous for the sake of clarity
@@ -72,7 +73,8 @@ def call_llm_model_ollama(vision_text, bounding_boxes):
         messages=[
             {
                 "role": "user",
-                "content": prompt_text
+                "content": prompt_text,
+                "max_tokens": 32,
             }
         ],
         stream=False  # blocking call
